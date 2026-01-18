@@ -38,6 +38,7 @@ public class SysUser implements Serializable {
     private String password;
 
     @ApiModelProperty("盐")
+    @TableField(exist = false)
     private String salt;
 
     @ApiModelProperty("邮箱")

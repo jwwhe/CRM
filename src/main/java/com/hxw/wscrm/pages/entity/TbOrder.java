@@ -58,6 +58,11 @@ public class TbOrder implements Serializable {
 
     @ApiModelProperty("联系电话")
     private String customerPhone;
+
+    @ApiModelProperty("更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updateTime;
+
     public Integer getOrderId() {
         return orderId;
     }
@@ -138,6 +143,14 @@ public class TbOrder implements Serializable {
         this.customerPhone = customerPhone;
     }
 
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
     @Override
     public String toString() {
         return "TbOrder{" +
@@ -152,6 +165,7 @@ public class TbOrder implements Serializable {
                 ", remark='" + remark + '\'' +
                 ", userId='" + userId + '\'' +
                 ", customerPhone='" + customerPhone + '\'' +
+                ", updateTime=" + updateTime +
                 '}';
     }
 }

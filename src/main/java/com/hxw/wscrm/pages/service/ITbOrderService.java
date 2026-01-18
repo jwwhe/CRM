@@ -20,5 +20,23 @@ public interface ITbOrderService extends IService<TbOrder> {
 
     PageUtils queryPage(TbOrederQueryDTO queryDTO);
 
-    void saveOrUpdateRole(TbOrder tbOrder);
+    void saveOrUpdateOrder(TbOrder tbOrder);
+
+    TbOrder getOrderDetail(Integer orderId);
+
+    void deleteOrder(Integer orderId);
+
+    void updateOrderStatus(Integer orderId, Integer status);
+
+    void confirmOrder(Integer orderId);
+
+    void payOrder(Integer orderId);
+
+    void shipOrder(Integer orderId);
+
+    void completeOrder(Integer orderId);
+
+    void cancelOrder(Integer orderId);
+
+    void refundOrder(Integer orderId);
 }

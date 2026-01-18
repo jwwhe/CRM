@@ -13,14 +13,8 @@ import com.hxw.wscrm.sys.entity.SysRole;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-/**
- * <p>
- *  服务实现类
- * </p>
- *
- * @author 小贺
- * @since 2025-09-19
- */
+import java.time.LocalDateTime;
+
 @Service
 public class TbOrderServiceImpl extends ServiceImpl<TbOrderMapper, TbOrder> implements ITbOrderService {
 
@@ -34,7 +28,63 @@ public class TbOrderServiceImpl extends ServiceImpl<TbOrderMapper, TbOrder> impl
     }
 
     @Override
-    public void saveOrUpdateRole(TbOrder sysRole) {
+    public void saveOrUpdateOrder(TbOrder tbOrder) {
+        Long userId = SecurityUtil.getUserId();
+        if (tbOrder.getOrderId() == null) {
+            tbOrder.setCreateTime(LocalDateTime.now());
+            tbOrder.setUserId(userId);
+        }
+        tbOrder.setUpdateTime(LocalDateTime.now());
+        this.saveOrUpdate(tbOrder);
+    }
 
+    @Override
+    public TbOrder getOrderDetail(Integer orderId) {
+        return this.getById(orderId);
+    }
+
+    @Override
+    public void deleteOrder(Integer orderId) {
+        this.removeById(orderId);
+    }
+
+    @Override
+    public void updateOrderStatus(Integer orderId, Integer status) {
+        TbOrder order = this.getById(orderId);
+        if (order != null) {
+            order.setStatus(status);
+            order.setUpdateTime(LocalDateTime.now());
+            this.updateById(order);
+        }
+    }
+
+    @Override
+    public void confirmOrder(Integer orderId) {
+        updateOrderStatus(orderId, 1);
+    }
+
+    @Override
+    public void payOrder(Integer orderId) {
+        updateOrderStatus(orderId, 2);
+    }
+
+    @Override
+    public void shipOrder(Integer orderId) {
+        updateOrderStatus(orderId, 3);
+    }
+
+    @Override
+    public void completeOrder(Integer orderId) {
+        updateOrderStatus(orderId, 4);
+    }
+
+    @Override
+    public void cancelOrder(Integer orderId) {
+        updateOrderStatus(orderId, 5);
+    }
+
+    @Override
+    public void refundOrder(Integer orderId) {
+        updateOrderStatus(orderId, 6);
     }
 }
