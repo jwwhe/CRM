@@ -22,4 +22,6 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     void saveUserAndRole(@Param("userId") Long userId,@Param("roleId") Integer roleId);
 
     List<Integer> selectRoleIdsByUserId(@Param("userId") Long userId);
+
+    List<SysUser> selectUsersByRoleId(@Param("roleId") Integer roleId);
 }

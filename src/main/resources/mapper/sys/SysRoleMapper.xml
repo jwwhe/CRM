@@ -16,4 +16,24 @@
             SELECT role_id FROM sys_user_role s2 WHERE s2.user_id = #{userId}
             )
     </select>
+
+    <select id="queryPermissionsByMenuId" resultType="java.util.Map">
+        SELECT permission_id as id, permission_name as name, permission_code as code 
+        FROM sys_permission 
+        WHERE menu_id = #{menuId} AND status = 1
+    </select>
+
+    <select id="queryPermissionIdByRoleId" resultType="java.lang.Long">
+        SELECT permission_id 
+        FROM sys_role_permission 
+        WHERE role_id = #{roleId}
+    </select>
+
+    <delete id="deletePermissionByRoleId">
+        delete from sys_role_permission where role_id = #{roleId}
+    </delete>
+
+    <insert id="insertRoleAndPermission">
+        insert into sys_role_permission(role_id, permission_id) values (#{roleId}, #{permissionId})
+    </insert>
 </mapper>

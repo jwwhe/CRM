@@ -2,6 +2,7 @@ package com.hxw.wscrm.sys.service.impl;
 
 import com.hxw.wscrm.sys.entity.SysRole;
 import com.hxw.wscrm.sys.entity.SysUser;
+import com.hxw.wscrm.sys.service.ISysMenuService;
 import com.hxw.wscrm.sys.service.ISysRoleService;
 import com.hxw.wscrm.sys.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Autowired
     ISysRoleService sysRoleService;
+
+    @Autowired
+    ISysMenuService sysMenuService;
+
     /**
      * 完成账号的校验
      * @param username
@@ -46,9 +51,23 @@ public class UserDetailServiceImpl implements UserDetailsService {
            List<GrantedAuthority> listRole = new ArrayList<>();
            if (sysRoles != null && sysRoles.size() > 0) {
                for (SysRole sysRole : sysRoles) {
-                   listRole.add(new SimpleGrantedAuthority(sysRole.getRoleName()));
+                   listRole.add(new SimpleGrantedAuthority("ROLE_" + sysRole.getRoleName()));
                }
            }
+           
+           // Load permissions
+           List<String> perms = sysMenuService.queryPermsByUserName(username);
+           if (perms != null && perms.size() > 0) {
+               for (String perm : perms) {
+                   if (org.apache.commons.lang3.StringUtils.isNotEmpty(perm)) {
+                        // Split by comma if multiple permissions in one field
+                        for (String p : perm.split(",")) {
+                            listRole.add(new SimpleGrantedAuthority(p.trim()));
+                        }
+                   }
+               }
+           }
+           
            return new User(sysUser.getUsername(), sysUser.getPassword(), listRole);
        }
         return null;

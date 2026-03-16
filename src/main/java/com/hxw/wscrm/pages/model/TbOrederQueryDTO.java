@@ -13,4 +13,12 @@ public class TbOrederQueryDTO extends PageDTO {
     private String customerName;
     @ApiModelProperty("订单状态")
     private String status;
+    @ApiModelProperty("用户ID")
+    private Long userId;
+
+    @ApiModelProperty("合同ID")
+    private Long contractId;
+
+    @ApiModelProperty("客户ID")
+    private Long customerId;
 }

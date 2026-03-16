@@ -1,6 +1,86 @@
-<html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>角色权限管理</title>
+  <!-- 引入 Element UI -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!-- 引入 Vue -->
+  <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+  <!-- 引入 Element UI -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <!-- 引入 Axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    .container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .menu-tree {
+      width: 300px;
+      border-right: 1px solid #e4e7ed;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .permission-panel {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .permission-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      border: 1px solid #e4e7ed;
+      border-radius: 4px;
+    }
+    .permission-item h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .permission-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-item .el-checkbox__label {
+      margin-left: 5px;
+    }
+    .permission-code {
+      font-size: 12px;
+      color: #909399;
+      margin-left: 10px;
+    }
+    .save-button {
+      margin-top: 20px;
+    }
+    .el-tree-node__content {
+      height: 40px;
+    }
+  </style>
+</head>
 <body>
-<h1>hello word!!!</h1>
-<p>this is a html page</p>
-</body>
-</html>
+  <div id="app">
+    <div class="container">
+      <!-- 左侧菜单树 -->
+      <div class="menu-tree">
+        <h2>菜单树</h2>
+        <el-tree
+          :data="menuTree"
+          :props="treeProps"
+          node-key="id"
+          @node-click="handleNodeClick"
+          default-expand-all
+        />
+      </div>
+      <!-- 右侧权限面板 -->
+      <div class="permission-panel">
+        <h2>权限管理</h2>
+        <div v-if="selectedMenu">

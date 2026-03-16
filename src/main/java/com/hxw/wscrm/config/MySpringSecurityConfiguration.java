@@ -2,9 +2,11 @@ package com.hxw.wscrm.config;
 
 import com.hxw.wscrm.sys.filter.TokenLoginFilter;
 import com.hxw.wscrm.sys.filter.TokenVerifyFilter;
+import com.hxw.wscrm.sys.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -22,9 +24,16 @@ import java.util.Arrays;
  * SpringSecurity的配置成类
  */
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MySpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     UserDetailsService userDetailsService;
+    
+    @Autowired
+    ISysUserService sysUserService;
+    
+    @Autowired
+    com.hxw.wscrm.sys.service.ISysMenuService sysMenuService;
 
 
     @Override
@@ -45,8 +54,9 @@ public class MySpringSecurityConfiguration extends WebSecurityConfigurerAdapter 
                 .anyRequest().authenticated()
                 .and()
                 .cors().configurationSource(corsConfigurationSource())
-                .and().addFilter(new TokenLoginFilter(super.authenticationManager()))
-                .addFilter(new TokenVerifyFilter(super.authenticationManager()))
+                .and()
+                .addFilter(getTokenLoginFilter())
+                .addFilter(getTokenVerifyFilter())
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
@@ -65,6 +75,34 @@ public class MySpringSecurityConfiguration extends WebSecurityConfigurerAdapter 
         source.registerCorsConfiguration("/**", configuration);
         return source;
 
+    }
+    
+    /**
+     * 创建并配置TokenLoginFilter实例
+     * @return TokenLoginFilter实例
+     * @throws Exception 异常
+     */
+    private TokenLoginFilter getTokenLoginFilter() throws Exception {
+        TokenLoginFilter tokenLoginFilter = new TokenLoginFilter(super.authenticationManager());
+        // 设置sysUserService
+        tokenLoginFilter.setSysUserService(sysUserService);
+        // 设置sysMenuService
+        tokenLoginFilter.setSysMenuService(sysMenuService);
+        return tokenLoginFilter;
+    }
+    
+    /**
+     * 创建并配置TokenVerifyFilter实例
+     * @return TokenVerifyFilter实例
+     * @throws Exception 异常
+     */
+    private TokenVerifyFilter getTokenVerifyFilter() throws Exception {
+        TokenVerifyFilter tokenVerifyFilter = new TokenVerifyFilter(super.authenticationManager());
+        // 设置sysMenuService
+        tokenVerifyFilter.setSysMenuService(sysMenuService);
+        // 设置sysUserService
+        tokenVerifyFilter.setSysUserService(sysUserService);
+        return tokenVerifyFilter;
     }
     @Override
     public void configure(WebSecurity web) throws Exception {

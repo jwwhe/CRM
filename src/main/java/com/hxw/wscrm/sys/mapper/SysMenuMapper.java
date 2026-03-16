@@ -24,4 +24,6 @@ public interface SysMenuMapper extends BaseMapper<SysMenu> {
     List<SysMenu> selectShowMenuParent(@Param("userName") String userName);
 
     List<SysMenu> selectShowMenuSubByUserName(@Param("userName") String userName, @Param("menuId") Long menuId);
+
+    List<String> queryPermsByUserName(@Param("userName") String userName);
 }

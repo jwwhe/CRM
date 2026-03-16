@@ -46,9 +46,9 @@ public class JWTUtils {
         DecodedJWT decodedJWT = null;
         try {
             decodedJWT = JWT.require(Algorithm.HMAC256(SECRET)).build().verify(token);
-        }catch (SignatureVerificationException e){
-            System.out.println("算法不匹配异常：" + e.getMessage());
         }catch (AlgorithmMismatchException e){
+            System.out.println("算法不匹配异常：" + e.getMessage());
+        }catch (SignatureVerificationException e){
             System.out.println("签名验证异常：" + e.getMessage());
         }catch (Exception e){
             System.out.println("其他异常：" + e.getMessage());

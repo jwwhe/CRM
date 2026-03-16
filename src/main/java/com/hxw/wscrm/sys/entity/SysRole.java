@@ -45,6 +45,9 @@ public class SysRole implements Serializable {
     @TableField(exist = false)
     private List<Integer> menuIds;
 
+    @TableField(exist = false)
+    private List<Long> permissionIds;
+
     public Long getRoleId() {
         return roleId;
     }
@@ -87,6 +90,14 @@ public class SysRole implements Serializable {
 
     public void setMenuIds(List<Integer> menuIds) {
         this.menuIds = menuIds;
+    }
+
+    public List<Long> getPermissionIds() {
+        return permissionIds;
+    }
+
+    public void setPermissionIds(List<Long> permissionIds) {
+        this.permissionIds = permissionIds;
     }
 
     @Override

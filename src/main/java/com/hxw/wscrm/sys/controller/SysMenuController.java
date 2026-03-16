@@ -10,11 +10,8 @@ import com.hxw.wscrm.sys.service.ISysMenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,7 +24,7 @@ import java.util.List;
  * @since 2025-08-09
  */
 @Api(tags = "菜单",value = "SysMenu")
-@Controller
+@RestController
 @RequestMapping("/sys/sysMenu")
 public class SysMenuController {
     @Autowired
@@ -35,6 +32,7 @@ public class SysMenuController {
 
     @ApiOperation(value = "查询菜单信息",notes = "查询菜单信息")
     @GetMapping("/list")
+    @PreAuthorize("hasAuthority('sys:query')")
     public PageUtils list(SysMenuQueryDTO dto){
 
         return menuService.listPage(dto);
@@ -48,6 +46,7 @@ public class SysMenuController {
 
     @PostMapping("/save")
     @ApiOperation(value = "操作菜单数据",notes = "添加/更新菜单")
+    @PreAuthorize("hasAuthority('sys:add') or hasAuthority('sys:update')")
     public String save(@RequestBody SysMenu menu){
         if (menu != null){
             menuService.saveOrUpdateMenu(menu);
@@ -57,6 +56,7 @@ public class SysMenuController {
 
     @GetMapping("/queryMenuById")
     @ApiOperation(value = "根据ID查询菜单",notes = "根据ID查询菜单")
+    @PreAuthorize("hasAuthority('sys:query')")
     public MenuUpdateDTO queryMenuById(Long menuId){
         SysMenu sysMenu = menuService.queryMenuById(menuId);
         List<SysMenu> parents = menuService.listParent();
@@ -65,6 +65,7 @@ public class SysMenuController {
 
     @GetMapping("/deleteMenu")
     @ApiOperation(value = "删除菜单",notes = "删除菜单")
+    @PreAuthorize("hasAuthority('sys:delete')")
     public String deleteMenu(Long menuId){
         //不能删除返回0 否则返回1
     return   menuService.deleteMenuById(menuId);
@@ -72,7 +73,8 @@ public class SysMenuController {
 
     @ApiOperation(value = "获取当前登录用户的菜单",notes = "获取当前登录用户的菜单")
     @GetMapping("/getShowMenu")
-    public List<ShowMenu> getShowMenu(){
-    return menuService.getShowMenu();
+    public com.hxw.wscrm.common.result.ResultWrapper<List<ShowMenu>> getShowMenu(){
+    List<ShowMenu> menuList = menuService.getShowMenu();
+    return com.hxw.wscrm.common.result.ResultWrapper.success(menuList);
     }
 }

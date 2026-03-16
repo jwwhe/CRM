@@ -6,6 +6,7 @@ import com.hxw.wscrm.sys.entity.SysRole;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -24,4 +25,12 @@ public interface SysRoleMapper extends BaseMapper<SysRole> {
     void deleteMenuByRoleId(@Param("roleId") Long roleId);
 
     void insertRoleAndMenu(@Param("roleId") Long roleId, @Param("menuId") Integer menuId);
+
+    List<Map<String, Object>> queryPermissionsByMenuId(@Param("menuId") Long menuId);
+
+    List<Long> queryPermissionIdByRoleId(@Param("roleId") Long roleId);
+
+    void deletePermissionByRoleId(@Param("roleId") Long roleId);
+
+    void insertRoleAndPermission(@Param("roleId") Long roleId, @Param("permissionId") Long permissionId);
 }

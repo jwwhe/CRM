@@ -81,7 +81,18 @@ public class SysLogAspect {
         sysLog.setCreateDate(LocalDateTime.now());
         //记录操作人
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        String userName = (String) token.getPrincipal();
+        String userName = null;
+        Object principal = token.getPrincipal();
+        if (principal instanceof String) {
+            userName = (String) principal;
+        } else if (principal != null) {
+            // 尝试从SysUser对象中获取用户名
+            try {
+                userName = (String) principal.getClass().getMethod("getUsername").invoke(principal);
+            } catch (Exception e) {
+                // 忽略异常，userName保持为null
+            }
+        }
         sysLog.setUsername(userName);
         sysLogService.save(sysLog);
     }

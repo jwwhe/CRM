@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hxw.wscrm.common.annotaion.SystemLog;
 import com.hxw.wscrm.common.util.PageUtils;
 import com.hxw.wscrm.sys.entity.SysMenu;
+import com.hxw.wscrm.sys.entity.SysUser;
 import com.hxw.wscrm.sys.mapper.SysMenuMapper;
 import com.hxw.wscrm.sys.model.ShowMenu;
 import com.hxw.wscrm.sys.model.SysMenuQueryDTO;
 import com.hxw.wscrm.sys.service.ISysMenuService;
+import com.hxw.wscrm.sys.service.ISysPermissionService;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +37,12 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
     @Autowired
     private SysMenuMapper sysMenuMapper;
+    
+    @Autowired
+    private ISysPermissionService sysPermissionService;
+    
+    @Autowired
+    private com.hxw.wscrm.sys.service.ISysUserService sysUserService;
 
     /**
      * 查询所有的菜单信息
@@ -94,10 +102,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
         if (menu != null && menu.getMenuId() > 0){
             //表示是更新操作
-
             this.updateById(menu);
         }else {
-
             if (StringUtils.isNotBlank(menu.getLabel()) && StringUtils.isBlank(menu.getName())){
                 menu.setName(menu.getLabel());
             }
@@ -106,6 +112,14 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 menu.setParentId(0L);
             }
             this.save(menu);
+            
+            // 为新增的菜单生成增删改查四个权限
+            // 使用菜单名称作为权限编码前缀
+            String menuCode = menu.getName() != null ? menu.getName() : menu.getLabel();
+            if (StringUtils.isNotBlank(menuCode)) {
+                Long userId = getCurrentUserId();
+                sysPermissionService.batchCreatePermissions(menu.getMenuId(), menuCode, userId);
+            }
         }
     }
 
@@ -122,8 +136,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
        int count =  sysMenuMapper.canBeDeleted(menuId);
        if (count == 0){
            //表示数据可以删除
-        this.baseMapper.deleteById(menuId);
-        return "1";
+           // 先删除该菜单下的所有权限
+           sysPermissionService.deletePermissionsByMenuId(menuId);
+           // 再删除菜单
+           this.baseMapper.deleteById(menuId);
+           return "1";
        }
        //表示数据不能被删除
         return "0";
@@ -139,9 +156,36 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     public List<ShowMenu> getShowMenu() {
         //获取当前登录的用户
         UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        String userName = (String) token.getPrincipal();
+        String tempUserName = null;
+        Object principal = token.getPrincipal();
+        if (principal instanceof String) {
+            tempUserName = (String) principal;
+        } else if (principal instanceof SysUser) {
+            // 如果principal是SysUser对象，直接调用getUsername()方法
+            tempUserName = ((SysUser) principal).getUsername();
+        } else if (principal instanceof org.springframework.security.core.userdetails.User) {
+            // 如果principal是User对象，直接调用getUsername()方法
+            tempUserName = ((org.springframework.security.core.userdetails.User) principal).getUsername();
+        } else if (principal != null) {
+            // 尝试从其他对象中获取用户名
+            try {
+                tempUserName = (String) principal.getClass().getMethod("getUsername").invoke(principal);
+            } catch (Exception e) {
+                // 忽略异常，userName保持为null
+                System.err.println("Error getting username from principal: " + e.getMessage());
+            }
+        }
+        // 如果没有获取到用户名，返回空列表
+        if (tempUserName == null) {
+            System.err.println("No username found in principal");
+            return new ArrayList<>();
+        }
+        // 创建一个final的副本，用于lambda表达式中
+        final String userName = tempUserName;
+        System.out.println("Getting menu for user: " + userName);
         //查询当前登录用户的所有的父菜单
        List<SysMenu> list =  this.baseMapper.selectShowMenuParent(userName);
+       System.out.println("Parent menu list size: " + (list != null ? list.size() : 0));
        if (list != null && list.size() > 0){
            return list.stream().map(item->{
                ShowMenu showMenu = new ShowMenu();
@@ -164,12 +208,46 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                        showMenus.add(subMenu);
                    }
                    showMenu.setChildren(showMenus);
+               } else {
+                   // Ensure children is null if empty, so frontend filters correctly
+                   showMenu.setChildren(null);
                }
 
                return showMenu;
            }).collect(Collectors.toList());
        }
 
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<String> queryPermsByUserName(String userName) {
+        return sysMenuMapper.queryPermsByUserName(userName);
+    }
+    
+    /**
+     * 获取当前登录用户ID
+     * @return 用户ID
+     */
+    private Long getCurrentUserId() {
+        //获取当前登录的用户
+        UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        Object principal = token.getPrincipal();
+        if (principal instanceof String) {
+            // 如果principal是用户名，查询用户信息
+            String userName = (String) principal;
+            List<SysUser> list = sysUserService.queryByUserName(userName);
+            if (list != null && list.size() == 1) {
+                return list.get(0).getUserId();
+            }
+        } else if (principal != null) {
+            // 尝试从SysUser对象中获取用户ID
+            try {
+                return (Long) principal.getClass().getMethod("getUserId").invoke(principal);
+            } catch (Exception e) {
+                // 忽略异常
+            }
+        }
         return null;
     }
 }

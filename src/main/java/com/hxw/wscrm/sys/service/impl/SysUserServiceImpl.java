@@ -127,4 +127,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         return null;
     }
+    
+    /**
+     * 根据用户名获取用户信息（静态方法，供TokenLoginFilter使用）
+     * @param username 用户名
+     * @return SysUser对象
+     */
+    public static SysUser getUserByUsername(String username) {
+        SysUserServiceImpl service = new SysUserServiceImpl();
+        List<SysUser> list = service.baseMapper.selectList(new QueryWrapper<SysUser>().eq("username", username));
+        if (list != null && list.size() == 1) {
+            return list.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Integer> getRoleIdsByUserId(Long userId) {
+        return this.baseMapper.selectRoleIdsByUserId(userId);
+    }
+
+    @Override
+    public List<SysUser> queryByRoleId(Integer roleId) {
+        return this.baseMapper.selectUsersByRoleId(roleId);
+    }
 }

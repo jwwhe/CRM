@@ -4,6 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.hxw.wscrm.common.constant.SystemConstant;
 import com.hxw.wscrm.common.result.JWTUtils;
+import com.hxw.wscrm.sys.entity.SysUser;
+import com.hxw.wscrm.sys.service.ISysMenuService;
+import com.hxw.wscrm.sys.service.ISysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,8 +28,19 @@ import java.util.Map;
 
 public class TokenVerifyFilter extends BasicAuthenticationFilter {
 
+    private ISysMenuService sysMenuService;
+    private ISysUserService sysUserService;
+
     public TokenVerifyFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
+    }
+
+    public void setSysMenuService(ISysMenuService sysMenuService) {
+        this.sysMenuService = sysMenuService;
+    }
+
+    public void setSysUserService(ISysUserService sysUserService) {
+        this.sysUserService = sysUserService;
     }
 
     /**
@@ -61,17 +76,41 @@ public class TokenVerifyFilter extends BasicAuthenticationFilter {
             // 2.校验token信息是否合法
             DecodedJWT verify = JWTUtils.verify(token);
 
-            // 3.如果验证失败会抛出异常，验证成功则继续处理
+            // 3.如果验证失败会返回null，验证成功则继续处理
+            if (verify == null) {
+                responseLogin(response);
+                return;
+            }
             String userName = verify.getClaim("username").asString();
 
-            // 4.获取用户权限（实际应用中应该从token或数据库中查询真实权限）
+            // 4.从数据库中查询用户的实际权限
             List<GrantedAuthority> authorities = new ArrayList<>();
-            // 这里只是示例，实际应根据用户角色动态设置权限
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            if (sysMenuService != null) {
+                List<String> perms = sysMenuService.queryPermsByUserName(userName);
+                if (perms != null && !perms.isEmpty()) {
+                    for (String perm : perms) {
+                        authorities.add(new SimpleGrantedAuthority(perm));
+                    }
+                }
+            }
+            // 如果没有查询到权限，添加默认权限（可选）
+            if (authorities.isEmpty()) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            }
 
-            // 5.创建认证信息并设置到安全上下文
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userName, null, authorities);
+            // 5.查询用户信息
+            SysUser user = null;
+            if (sysUserService != null) {
+                List<SysUser> users = sysUserService.queryByUserName(userName);
+                if (users != null && !users.isEmpty()) {
+                    user = users.get(0);
+                }
+            }
+
+            // 6.创建认证信息并设置到安全上下文
+            Object principal = user != null ? user : userName;
+            UsernamePasswordAuthenticationToken authentication = 
+                    new UsernamePasswordAuthenticationToken(principal, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // 6.放行请求

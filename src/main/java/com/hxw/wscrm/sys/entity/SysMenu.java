@@ -40,8 +40,7 @@ public class SysMenu implements Serializable {
     @ApiModelProperty("菜单路径")
     private String path;
 
-    @ApiModelProperty("授权(多个用逗号分隔，如：user:list,user:create)")
-    private String perms;
+
 
     @ApiModelProperty("类型   0：目录   1：菜单   2：按钮")
     private Integer type;
@@ -120,13 +119,7 @@ public class SysMenu implements Serializable {
     public void setUrl(String url) {
         this.url = url;
     }
-    public String getPerms() {
-        return perms;
-    }
 
-    public void setPerms(String perms) {
-        this.perms = perms;
-    }
     public Integer getType() {
         return type;
     }
@@ -156,7 +149,6 @@ public class SysMenu implements Serializable {
             ", parentId=" + parentId +
             ", name=" + name +
             ", url=" + url +
-            ", perms=" + perms +
             ", type=" + type +
             ", icon=" + icon +
             ", orderNum=" + orderNum +

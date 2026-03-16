@@ -55,6 +55,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             this.update(role);
             // 根据roleID 删除分配的菜单信息
             sysRoleMapper.deleteMenuByRoleId(role.getRoleId());
+            // 根据roleID 删除分配的权限信息
+            sysRoleMapper.deletePermissionByRoleId(role.getRoleId());
         }else {
            this.saveRole(role);
         }
@@ -64,6 +66,14 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             // 说明分配的有相关的信息
             for (Integer menuId : menuIds) {
                 sysRoleMapper.insertRoleAndMenu(role.getRoleId(),menuId);
+            }
+        }
+        //  新增分配的权限信息
+        List<Long> permissionIds = role.getPermissionIds();
+        if (permissionIds != null && permissionIds.size() > 0){
+            // 说明分配的有相关的信息
+            for (Long permissionId : permissionIds) {
+                sysRoleMapper.insertRoleAndPermission(role.getRoleId(),permissionId);
             }
         }
     }
@@ -90,7 +100,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         if (roleId != null) {
             wrapper.ne("role_id", roleId); // 添加条件：角色ID不等于当前ID
         }
-        int count = this.count(wrapper);
+        long count = this.count(wrapper);
         return count > 0 ;
     }
     @SystemLog("删除角色")
@@ -126,6 +136,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 Map<String,Object> map = new HashMap<>();
                 map.put("id",parent.getMenuId());
                 map.put("label",parent.getLabel());
+                // 查询该父菜单的权限列表
+                List<Map<String,Object>> parentPermissions = sysRoleMapper.queryPermissionsByMenuId(parent.getMenuId());
+                map.put("permissions", parentPermissions);
+                
                 //根据父菜单编号查询对应的子菜单信息
                 Long parentId = parent.getMenuId();
                 QueryWrapper<SysMenu> wrapper = new QueryWrapper<SysMenu>().eq("parent_id",parentId);
@@ -136,6 +150,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                         Map<String,Object> subMap = new HashMap<>();
                         subMap.put("id",subMenu.getMenuId());
                         subMap.put("label",subMenu.getName());
+                        // 查询该菜单的权限列表
+                        List<Map<String,Object>> permissions = sysRoleMapper.queryPermissionsByMenuId(subMenu.getMenuId());
+                        subMap.put("permissions", permissions);
                         subList.add(subMap);
                     }
                 }
@@ -145,9 +162,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             }
         }
         //根据角色编号查询分配的菜单编号
-      List<Integer> menudIds =   menuService.queryMenuIdByRoleId(roleId);
+        List<Integer> menudIds = menuService.queryMenuIdByRoleId(roleId);
+        //根据角色编号查询分配的权限编号
+        List<Long> permissionIds = sysRoleMapper.queryPermissionIdByRoleId(roleId);
         Map<String,Object> resMap = new HashMap<>();
         resMap.put("checks",menudIds);
+        resMap.put("permissionChecks",permissionIds);
         resMap.put("treeData",list);
         return resMap;
     }

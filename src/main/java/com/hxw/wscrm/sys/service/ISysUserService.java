@@ -27,4 +27,8 @@ public interface ISysUserService extends IService<SysUser> {
     void saveOrUpdateUser(SysUser user);
 
     SysUser queryByUserId(Long userId);
+
+    List<Integer> getRoleIdsByUserId(Long userId);
+
+    List<SysUser> queryByRoleId(Integer roleId);
 }

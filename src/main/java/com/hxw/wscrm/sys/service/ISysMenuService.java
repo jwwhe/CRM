@@ -32,4 +32,6 @@ public interface ISysMenuService extends IService<SysMenu> {
     List<Integer> queryMenuIdByRoleId(Long roleId);
 
     List<ShowMenu> getShowMenu();
+
+    List<String> queryPermsByUserName(String userName);
 }

@@ -16,6 +16,10 @@ spring:
    min-evictable-idle-time-millis: 300000
    keep-alive: true
    keep-alive-between-time-millis: 60000
+ servlet:
+   multipart:
+    max-file-size: 50MB
+    max-request-size: 100MB
 # MyBatisPlus的相关配置
 mybatis-plus:
  mapper-locations: classpath*:/mapper/*/*.xml
@@ -40,3 +44,4 @@ server:
  servlet:
   context-path: /wanshu
  port: 8086
+ address: 0.0.0.0

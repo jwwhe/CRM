@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.4.3.1</version>
+            <version>3.5.3.2</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -138,12 +138,12 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.hxw.wscrm.WscrmApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
                         <id>repackage</id>
                         <goals>
+                            <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>

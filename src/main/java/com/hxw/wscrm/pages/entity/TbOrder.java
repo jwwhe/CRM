@@ -1,10 +1,13 @@
 package com.hxw.wscrm.pages.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -34,8 +37,11 @@ public class TbOrder implements Serializable {
     @ApiModelProperty("客户名称")
     private String customerName;
 
+    @ApiModelProperty("客户ID")
+    private Long customerId;
+
     @ApiModelProperty("订单金额")
-    private Integer totalAmount;
+    private BigDecimal totalAmount;
 
     @ApiModelProperty("订单状态")
     private Integer status;
@@ -56,8 +62,35 @@ public class TbOrder implements Serializable {
     @ApiModelProperty("用户id")
     private Long userId;
 
+    @ApiModelProperty("用户名")
+    @TableField(exist = false)
+    private String userName;
+
     @ApiModelProperty("联系电话")
     private String customerPhone;
+
+    @ApiModelProperty("关联合同ID")
+    private Long contractId;
+
+    @ApiModelProperty("物流公司")
+    private String logisticsCompany;
+
+    @ApiModelProperty("物流单号")
+    private String logisticsNo;
+
+    @ApiModelProperty("发货状态")
+    private String deliveryStatus;
+
+    @ApiModelProperty("支付时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime payTime;
+
+    @ApiModelProperty("优惠金额")
+    private BigDecimal discountAmount;
+
+    @ApiModelProperty("订单产品列表")
+    @TableField(exist = false)
+    private List<TbOrderProduct> productList;
 
     @ApiModelProperty("更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -84,11 +117,20 @@ public class TbOrder implements Serializable {
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
     }
-    public Integer getTotalAmount() {
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(Integer totalAmount) {
+    public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
     public Integer getStatus() {
@@ -127,6 +169,14 @@ public class TbOrder implements Serializable {
         this.userId = userId;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getRemark() {
         return remark;
     }
@@ -151,6 +201,62 @@ public class TbOrder implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public Long getContractId() {
+        return contractId;
+    }
+
+    public void setContractId(Long contractId) {
+        this.contractId = contractId;
+    }
+
+    public String getLogisticsCompany() {
+        return logisticsCompany;
+    }
+
+    public void setLogisticsCompany(String logisticsCompany) {
+        this.logisticsCompany = logisticsCompany;
+    }
+
+    public String getLogisticsNo() {
+        return logisticsNo;
+    }
+
+    public void setLogisticsNo(String logisticsNo) {
+        this.logisticsNo = logisticsNo;
+    }
+
+    public String getDeliveryStatus() {
+        return deliveryStatus;
+    }
+
+    public void setDeliveryStatus(String deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+    }
+
+    public LocalDateTime getPayTime() {
+        return payTime;
+    }
+
+    public void setPayTime(LocalDateTime payTime) {
+        this.payTime = payTime;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public List<TbOrderProduct> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<TbOrderProduct> productList) {
+        this.productList = productList;
+    }
+
     @Override
     public String toString() {
         return "TbOrder{" +
@@ -164,6 +270,7 @@ public class TbOrder implements Serializable {
                 ", shippingAddress='" + shippingAddress + '\'' +
                 ", remark='" + remark + '\'' +
                 ", userId='" + userId + '\'' +
+                ", userName='" + userName + '\'' +
                 ", customerPhone='" + customerPhone + '\'' +
                 ", updateTime=" + updateTime +
                 '}';

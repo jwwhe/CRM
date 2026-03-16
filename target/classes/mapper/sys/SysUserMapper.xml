@@ -11,4 +11,10 @@
     <select id="selectRoleIdsByUserId" resultType="java.lang.Integer">
         select role_id from sys_user_role where user_id = #{userId}
     </select>
+
+    <select id="selectUsersByRoleId" resultType="com.hxw.wscrm.sys.entity.SysUser">
+        select u.* from sys_user u
+        left join sys_user_role sur on u.user_id = sur.user_id
+        where sur.role_id = #{roleId}
+    </select>
 </mapper>
